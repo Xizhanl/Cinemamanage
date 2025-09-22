@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="ljc.movie_manage.mapper.MovieMapper">
+    <select id="pageCC" resultMap="MovieResultMap">
+        select * from movie ${ew.customSqlSegment}
+    </select>
+
+    <select id="selectNowShowingMovies" resultMap="MovieResultMap">
+        SELECT
+            id, moviename, movieduration, movietype,
+            movietime, describes, moviecover, moviebox
+        FROM
+            movie
+        WHERE
+            movietime &lt;= #{currentDate}
+        ORDER BY
+            moviebox DESC
+            LIMIT #{limit}
+    </select>
+
+    <select id="selectComingSoonMovies" resultMap="MovieResultMap">
+        SELECT
+            id, moviename, movieduration, movietype,
+            movietime, describes, moviecover, moviebox
+        FROM
+            movie
+        WHERE
+            movietime &gt; #{currentDate}
+        ORDER BY
+            movietime ASC
+            LIMIT #{limit}
+    </select>
+    <resultMap id="MovieResultMap" type="ljc.movie_manage.entity.Movie">
+        <result column="movietype" property="movietype"
+                typeHandler="com.baomidou.mybatisplus.extension.handlers.JacksonTypeHandler"/>
+    </resultMap>
+
+</mapper>
