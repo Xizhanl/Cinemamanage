@@ -2,12 +2,9 @@ package ljc.movie_manage.controller;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import ljc.movie_manage.common.QueryPageParam;
 import ljc.movie_manage.common.Result;
-import ljc.movie_manage.entity.Movietypes;
-import ljc.movie_manage.entity.User;
 import ljc.movie_manage.service.IReviewsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
