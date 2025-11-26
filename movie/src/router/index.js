@@ -40,6 +40,11 @@ const routes = [
         component:()=>import('../components/movie/MovieTypes.vue')
       },
       {
+        path: '/MovieReviews',
+        name: 'moviereviews',
+        component:()=>import('../components/movie/MovieReviews.vue')
+      },
+      {
         path: '/Hall',
         name: 'hall',
         component:()=>import('../components/hall/Hall.vue'),

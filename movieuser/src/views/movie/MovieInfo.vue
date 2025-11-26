@@ -8,7 +8,9 @@ export default {
         movietype:[]
       },
       isLiked: false, // 收藏状态
-      likeid:''
+      likeid:'',
+      reviewlist:[],
+      content:''
     };
   },
   methods: {
@@ -35,7 +37,6 @@ export default {
         query:{id:movieId}})
     },
     async addlike() {
-
         const user =  JSON.parse(sessionStorage.getItem('CurUser'));
         const username = user.username
 
@@ -107,6 +108,49 @@ export default {
       } catch (error) {
         console.error('检查收藏状态失败:', error);
       }
+    },
+    async getreviewlist(){
+      const res = await axios.get(this.$httpUrl + "/reviews/list");
+      this.reviewlist = res.data.filter(review => review.moviename === this.movielist.moviename);
+    },
+    async addreview(){
+      const user =  JSON.parse(sessionStorage.getItem('CurUser'));
+      const username = user.username
+      const res = await axios.post(this.$httpUrl + "/reviews/save", {
+        username: username,
+        moviename: this.movielist.moviename,
+        content:this.content
+      });
+      if (res.data.code === 200) {
+        this.$message.success('评论成功');
+        // 清空输入框
+        this.content = '';
+        // 重新获取影评列表
+        await this.getreviewlist();
+      } else {
+        this.$message.error('评论失败');
+      }
+    },
+    async delreview(id,username) {
+      const user =  JSON.parse(sessionStorage.getItem('CurUser'));
+      const currentuser = user.username
+
+      if (currentuser !== username){
+        this.$message.error('只能删除自己的评论');
+        return;
+      }
+
+      await this.$confirm('确定要删除评论吗？', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      });
+
+      const res = await axios.get(this.$httpUrl + "/reviews/del?id=" + id);
+      if (res.data.code === 200) {
+        this.$message.success('删除成功');
+        await this.getreviewlist();
+      }
     }
   },
   created() {
@@ -118,12 +162,12 @@ export default {
           this.movielist = movie;
           // 检查收藏状态
           this.checkIfLiked();
+          this.getreviewlist()
         }
       }
     });
   },
-
-};
+}
 </script>
 
 <template>
@@ -194,7 +238,38 @@ export default {
           <p class="movie-desc">{{ movielist.describes }}</p>
         </div>
       </div>
-
+      <!-- 影评 -->
+      <div class="movie-section">
+        <div class="section-header">
+          <h2 class="section-title">
+            <i class="icon-story"></i>
+            <span>影评</span>
+          </h2>
+          <div class="review-input-area">
+            <input
+                v-model="content"
+                placeholder="请输入影评内容"
+                class="review-input">
+            <button class="publish-btn" @click="addreview">点击发表</button>
+          </div>
+        </div>
+        <!-- 影评列表 -->
+        <div class="review-list">
+          <div v-for="review in reviewlist" :key="review.id" class="review-item">
+            <div class="review-user">用户 {{ review.username }}：</div>
+            <div class="review-content">
+              <p class="review-text">{{ review.content }}</p>
+            </div>
+            <button class="delete-btn" @click="delreview(review.id,review.username)">
+              <i class="el-icon-delete"></i>
+            </button>
+          </div>
+        </div>
+        <!-- 空状态 -->
+        <div v-if="reviewlist.length === 0" class="empty-reviews">
+          暂无影评
+        </div>
+      </div>
     </div>
   </div>
 </template>
@@ -436,7 +511,7 @@ export default {
   display: inline-block;
   width: 24px;
   height: 24px;
-  background: #ff5f6d;
+  background: #ff9a9e;
   margin-right: 10px;
   border-radius: 4px;
 }
@@ -483,5 +558,98 @@ export default {
     align-items: flex-start;
     gap: 15px;
   }
+}
+/* 影评部分样式 */
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.publish-btn {
+  background: #00A699;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.publish-btn:hover {
+  background: #00A699;
+}
+
+.review-list {
+  border-top: 1px solid #f0f0f0;
+}
+
+.review-item {
+  display: flex;
+  align-items: flex-start;
+  padding: 16px 0;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.review-user {
+  font-weight: bold;
+  color: #333;
+  min-width: 80px;
+  margin-right: 12px;
+}
+
+.review-content {
+  flex: 1;
+  margin-right: 12px;
+}
+
+.review-text {
+  margin: 0;
+  line-height: 1.5;
+  color: #666;
+}
+
+.delete-btn {
+  background: none;
+  color: #f56c6c;
+  border: none;
+  padding: 4px 8px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: all 0.3s;
+}
+
+.delete-btn:hover {
+  background: #fef0f0;
+  color: #f78989;
+}
+
+.empty-reviews {
+  text-align: center;
+  color: #999;
+  padding: 40px 0;
+  border-top: 1px solid #f0f0f0;
+}
+.review-input-area {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.review-input {
+  flex: 1;
+  min-width: 300px;
+  padding: 8px 12px;
+  border: 1px solid #dcdfe6;
+  border-radius: 4px;
+  font-size: 14px;
+  outline: none;
+  transition: border-color 0.3s;
+}
+
+.review-input:focus {
+  border-color: #409eff;
 }
 </style>

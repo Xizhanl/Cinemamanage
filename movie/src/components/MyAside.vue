@@ -15,7 +15,8 @@ export default {
           menuIcon: "el-icon-video-camera",
           children: [
             { menuName: "电影信息管理", menuClick: "MovieManage" },
-            { menuName: "电影类别管理", menuClick: "MovieTypes" }
+            { menuName: "电影类别管理", menuClick: "MovieTypes" },
+            { menuName: "影评管理", menuClick: "MovieReviews"}
           ]
         },
         {

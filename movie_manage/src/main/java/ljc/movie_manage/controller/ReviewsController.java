@@ -1,10 +1,19 @@
 package ljc.movie_manage.controller;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.core.toolkit.StringUtils;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import ljc.movie_manage.common.QueryPageParam;
 import ljc.movie_manage.common.Result;
+import ljc.movie_manage.entity.Movietypes;
+import ljc.movie_manage.entity.User;
 import ljc.movie_manage.service.IReviewsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import ljc.movie_manage.entity.Reviews;
+
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -30,13 +39,30 @@ public class ReviewsController {
     }
     //删除
     @GetMapping("/del")
-    public Result del(@RequestBody Reviews reviews){
-        return reviewsService.removeById(reviews)?Result.suc():Result.fail();
+    public Result del(@RequestParam String id){
+        return reviewsService.removeById(id)?Result.suc():Result.fail();
     }
     //编辑
     @PostMapping("/mod")
     public Result mod(@RequestBody Reviews reviews){
         return reviewsService.updateById(reviews)?Result.suc():Result.fail();
+    }
+    @PostMapping("/listPageC1")
+    public Result listPageC1(@RequestBody QueryPageParam query){
+        HashMap<String, Object> param = query.getParam();
+        String username =(String)param.get("username");
+        String moviename =(String)param.get("moviename");
+        //分页mybatis
+        Page<Reviews> page = new Page<>();
+        page.setCurrent(query.getPageNum());
+        page.setSize(query.getPageSize());
+
+        LambdaQueryWrapper<Reviews> queryWrapper = new LambdaQueryWrapper<>();
+
+        queryWrapper.like(Reviews::getUsername,username);
+        queryWrapper.like(Reviews::getMoviename,moviename);
+        IPage<Reviews> result = reviewsService.page(page,queryWrapper);
+        return Result.suc(result.getRecords(),result.getTotal());
     }
 
 }
