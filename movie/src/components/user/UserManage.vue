@@ -94,6 +94,7 @@ export default {
     },
     resetParam(){
       this.username=''
+      this.loadPost()
     },
     add(){//新增
       this.dialogVisible=true

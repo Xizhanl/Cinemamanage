@@ -55,10 +55,10 @@ export default {
             }
           });
           if (updateRes.data.code === 200) {
-            this.$message.success('支付成功！2秒后自动跳转')
+            this.$message.success('支付成功！1秒后自动跳转')
             setTimeout(() => {
               this.$router.push({ path: '/DetailInfo', query: { id: orderId } })
-            }, 2000)
+            }, 1000)
           } else {
             this.$message.error('票房更新失败: ' + updateRes.data.msg);
           }

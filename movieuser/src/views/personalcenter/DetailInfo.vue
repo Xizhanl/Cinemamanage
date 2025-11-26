@@ -130,17 +130,15 @@ export default {
         this.$message.info('已取消操作')
       })
     },
-    async confirmOrder(orderId) {
+    async confirmOrder( ) {
       try {
         const response = await this.$axios.post(this.$httpUrl+'/orders/confirm', {
           id:this.orderDetails.id,
         });
         if (response.data.code === 200) {
           this.orderDetails.orderstatus = '待取票'   // 本地状态立即刷新
-          this.$message.success('支付成功！2秒后自动跳转')
-          setTimeout(() => {
-            this.$router.push({ path: '/DetailInfo', query: { id: orderId } })
-          }, 2000)
+          this.$message.success('支付成功！')
+
         } else {
           this.$message.error(response.data.msg);
         }
@@ -166,7 +164,7 @@ export default {
         if (response.data.code === 200) {
           setTimeout(() => {
             this.$router.push({ path: '/DetailInfo', query: { id: orderId } })
-          }, 2000)
+          }, 1000)
           this.orderDetails.orderstatus = '已完成';
             await this.$router.push({path:'/DetailInfo',query:{id:orderId}});
             this.$message.success('取票完成')

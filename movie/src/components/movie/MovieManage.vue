@@ -90,6 +90,8 @@ export default {
     },
     resetParam(){
       this.moviename=''
+      this.movietype=[]
+      this.loadPost() //查询所有数据
     },
     add(){//新增
       this.dialogVisible=true

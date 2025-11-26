@@ -29,6 +29,9 @@ public class Userlike implements Serializable {
     @TableField("moviename")
     private String moviename;
 
+    @TableField("moviecover")
+    private String moviecover;
+
     @TableField("username")
     private String username;
 }

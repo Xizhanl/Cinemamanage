@@ -1,4 +1,6 @@
 <script>
+import axios from "axios";
+
 export default {
   data() {
     return {
@@ -47,6 +49,7 @@ export default {
         ]
       },
       dialogVisible:false,
+      likeList:[]
     }
   },
   methods: {
@@ -73,7 +76,7 @@ export default {
                     this.$message.success("修改成功");
                     this.dialogVisible = false;
                   } else {
-                    this.$message.error(res.msg || "操作失败");
+                    this.$message.error( "操作失败");
                   }
                 })
                 .catch(err => {
@@ -98,6 +101,19 @@ export default {
     go(){
       this.$router.push("/BuyTicket")
     },
+    gomoviedetail(like){
+      if(like.moviename)
+        this.getmovieidbyname(like.moviename).then(movieid=>{
+          this.$router.push({
+            path:"/MovieInfo",
+            query:{id:movieid}})
+        })
+    },
+    async getmovieidbyname(moviename){
+        const res = await axios.get(this.$httpUrl + "/movie/list");
+        const movie = res.data.find(movie => movie.moviename === moviename);
+        return movie.id;
+    },
     initializeUser() {
       // 从sessionStorage获取当前用户信息
       const curUser = JSON.parse(sessionStorage.getItem("CurUser"));
@@ -109,10 +125,18 @@ export default {
         phone: curUser.phone,
         password: curUser.password,
       };
+    },
+    // 获取用户收藏列表
+    async getLikeList() {
+      const user =  JSON.parse(sessionStorage.getItem('CurUser'));
+      const username = user.username
+      const likelist = await axios.get(this.$httpUrl + "/userlike/list");
+      this.likeList = likelist.data.filter(like => like.username === username);
     }
   },
   created() {
     this.initializeUser();
+    this.getLikeList();
   }
 }
 </script>
@@ -146,8 +170,43 @@ export default {
         <el-button class="button" @click="mod">修改信息</el-button>
         <el-button class="button2" @click="go">立即购票</el-button>
       </el-card>
-
     </div>
+
+    <!-- 收藏列表卡片 -->
+    <el-card class="like-card">
+      <div slot="header">
+        <span style="font-size: 18px; font-weight: bold;color: #f56c6c">
+          <i class="el-icon-star-on"></i> 我的收藏
+        </span>
+      </div>
+
+      <!-- 空状态 -->
+      <div v-if="likeList.length === 0" class="empty-state">
+        <i class="el-icon-star-off"></i>
+        <div>暂无收藏的影片</div>
+      </div>
+
+      <!-- 收藏列表 - 水平滚动布局 -->
+      <div v-else class="movie-scroll-container">
+        <div class="movie-scroll-wrapper">
+          <div
+              v-for="like in likeList"
+              :key="like.id"
+              class="movie-item">
+            <div class="poster-container">
+              <img
+                  :src="like.moviecover"
+                  :alt="like.moviename"
+                  class="movie-poster"
+                  @click="gomoviedetail(like)">
+            </div>
+            <div class="movie-name">{{ like.moviename }}</div>
+          </div>
+        </div>
+      </div>
+    </el-card>
+
+
     <el-dialog :visible.sync="dialogVisible" width="30%" title="用户信息">
       <el-form ref="form"
                :rules="rules"
@@ -203,7 +262,7 @@ export default {
   height: 1px;
   background: linear-gradient(90deg, transparent, #d0e4ff, transparent);
   margin: 20px auto 0;
-  width: 80%;
+  width: 85%;
 }
 
 /* 3. 卡片：圆角+淡阴影 */
@@ -247,7 +306,6 @@ export default {
 .button:hover {
   background: #66b1ff;
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(64, 159, 255, 0.3);
 }
 
 .button2 {
@@ -259,6 +317,11 @@ export default {
   border: none;
   transition: all 0.25s;
 }
+.button2:hover {
+  background: #ebb563;
+  transform: translateY(-2px);
+}
+
 /* 6. 弹窗 */
 .el-dialog__wrapper /deep/ .el-dialog {
   border-radius: 12px;
@@ -268,5 +331,128 @@ export default {
   display: flex;
   justify-content: center;
   padding-top: 10px;
+}
+/* 7. 收藏列表样式 - 水平滚动布局 */
+.empty-state {
+  text-align: center;
+  padding: 60px 0;
+  color: #999;
+}
+
+.empty-state .el-icon-star-off {
+  font-size: 48px;
+  margin-bottom: 16px;
+  display: block;
+}
+
+/* 水平滚动容器 */
+.movie-scroll-container {
+  width: 100%;
+  overflow-x: auto;
+  padding: 10px 0 20px 0;
+}
+
+.movie-scroll-wrapper {
+  display: flex;
+  gap: 20px;
+  padding: 0 10px;
+  min-width: min-content; /* 确保内容不会被压缩 */
+}
+
+/* 隐藏滚动条但保持滚动功能 */
+.movie-scroll-container::-webkit-scrollbar {
+  height: 6px;
+}
+
+.movie-scroll-container::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 3px;
+}
+
+.movie-scroll-container::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 3px;
+}
+
+.movie-scroll-container::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
+}
+
+/* 电影项样式 */
+.movie-item {
+  flex: 0 0 auto; /* 不伸缩，不收缩 */
+  width: 150px; /* 固定宽度 */
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-align: center;
+}
+
+.movie-item:hover {
+  transform: translateY(-5px);
+}
+
+.movie-item:hover .movie-poster {
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+.poster-container {
+  margin-bottom: 12px;
+}
+
+.movie-poster {
+  width: 100%;
+  height: 200px; /* 固定高度，保持统一 */
+  object-fit: cover; /* 保持图片比例，裁剪多余部分 */
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+}
+
+.movie-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: #303133;
+  line-height: 1.4;
+  padding: 0 4px;
+  word-break: break-all;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  min-height: 40px; /* 固定高度，保持对齐 */
+}
+
+/* 响应式调整 */
+@media (max-width: 768px) {
+  .movie-item {
+    width: 130px;
+  }
+
+  .movie-poster {
+    height: 180px;
+  }
+
+  .movie-scroll-wrapper {
+    gap: 15px;
+  }
+}
+
+@media (max-width: 480px) {
+  .movie-item {
+    width: 110px;
+  }
+
+  .movie-poster {
+    height: 150px;
+  }
+
+  .movie-name {
+    font-size: 12px;
+    min-height: 36px;
+  }
+
+  .movie-scroll-wrapper {
+    gap: 12px;
+  }
 }
 </style>

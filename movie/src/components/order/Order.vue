@@ -82,6 +82,10 @@ export default {
     },
     resetParam(){
       this.username=''
+      this.moviename=''
+      this.hallname=''
+      this.orderstatus=''
+      this.loadPost()
     },
     doMod(){
       this.$axios.post(this.$httpUrl + '/orders/mod',this.form).then(res => res.data).then(res => {

@@ -167,12 +167,14 @@ export default {
         "已完成":0,
         "已取消":0,
         "待支付":0,
+        "待取票":0
       }
       this.orderData.forEach(order=>{
         const status = order.orderstatus;
         if (status==='已完成') statusCount['已完成']++;
         else if (status==='已取消') statusCount['已取消']++;
         else if (status==='待支付') statusCount['待支付']++;
+        else if (status==='待取票') statusCount['待取票']++;
       })
 
       const option = {
@@ -193,7 +195,7 @@ export default {
         },
         xAxis: {
           type: 'category',
-          data: ['已完成', '已取消', '待支付'],
+          data: ['已完成', '已取消', '待支付','待取票'],
           axisLabel: {
             interval: 0
           }
@@ -209,7 +211,8 @@ export default {
           data: [
             { value: statusCount['已完成'], itemStyle: { color: '#67C23A' } },
             { value: statusCount['已取消'], itemStyle: { color: '#F56C6C' } },
-            { value: statusCount['待支付'], itemStyle: { color: '#E6A23C' } }
+            { value: statusCount['待支付'], itemStyle: { color: '#E6A23C' } },
+            { value: statusCount['待取票'], itemStyle: { color: '#9A60B4' } }
           ],
           label: {
             show: true,

@@ -32,7 +32,7 @@ public class CodeGenerator {
                 })
                 //策略配置
                 .strategyConfig(builder -> {
-                    builder.addInclude("order") // 设置需要生成的表名
+                    builder.addInclude("reviews") // 设置需要生成的表名
                             .entityBuilder()
                             .enableLombok() // 启用 Lombok
                             .enableTableFieldAnnotation() // 启用字段注解

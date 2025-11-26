@@ -55,7 +55,7 @@ export default {
   border-radius: 8px;
   overflow: hidden;
   box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
-  height: 400px;
+  height: 900px;
 }
 
 .navigation {

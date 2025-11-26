@@ -23,15 +23,17 @@ public class UserlikeController {
     private IUserlikeService userlikeService;
     //获取列表
     @GetMapping("/list")
-    public List<Userlike> list(){return userlikeService.list();}
+    public List<Userlike> list(){
+        return userlikeService.list();
+    }
     //新增
     @PostMapping("/save")
     public Result save(@RequestBody Userlike userlike){
         return userlikeService.save(userlike)?Result.suc():Result.fail();
     }
     //删除
-    @PostMapping("/del")
-    public Result del(@RequestBody Userlike userlike){
-        return userlikeService.removeById(userlike)?Result.suc():Result.fail();
+    @GetMapping("/del")
+    public Result del(@RequestParam String id){
+        return userlikeService.removeById(id)?Result.suc():Result.fail();
     }
 }

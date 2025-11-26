@@ -107,6 +107,9 @@ export default {
     },
     resetParam(){
       this.hallname=''
+      this.halltype=''
+      this.statu=''
+      this.loadPost()
     },
     add(){//新增
       this.dialogVisible=true

@@ -137,6 +137,8 @@ export default {
     },
     resetParam(){
       this.hallname=''
+      this.moviename=''
+      this.loadPost()
     },
     add(){//新增
       this.dialogVisible=true

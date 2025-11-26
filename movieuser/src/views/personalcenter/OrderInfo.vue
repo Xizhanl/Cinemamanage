@@ -60,7 +60,7 @@ export default {
     },
     async delorder(orderId) {
       try {
-        await this.$confirm('确定要取消当前订单吗？', '提示', {
+        await this.$confirm('确定要删除当前订单吗？', '提示', {
           confirmButtonText: '确定',
           cancelButtonText: '取消',
           type: 'warning'
@@ -311,7 +311,7 @@ export default {
   gap: 8px;
 }
 .order-panel{
-  height: 70vh;              /* 视口 60%，也可以写 500px */
+  height: 800px;              /* 视口 60%，也可以写 500px */
   overflow-y: auto;          /* 关键 */
   border-radius: 6px;
   background: #fafbfc;

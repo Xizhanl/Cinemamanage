@@ -7,6 +7,8 @@ export default {
       movielist: {
         movietype:[]
       },
+      isLiked: false, // 收藏状态
+      likeid:''
     };
   },
   methods: {
@@ -32,6 +34,46 @@ export default {
         path:"/BuyTicket",
         query:{id:movieId}})
     },
+    async addlike() {
+
+        const user =  JSON.parse(sessionStorage.getItem('CurUser'));
+        const username = user.username
+
+        if (this.isLiked) {
+          // 取消收藏
+          await this.$confirm('确定要取消收藏吗？', '提示', {
+            confirmButtonText: '确定',
+            cancelButtonText: '取消',
+            type: 'warning'
+          });
+          const likelistRes = await axios.get(this.$httpUrl + "/userlike/list");
+          const likes = likelistRes.data;
+          const like = likes.find(like =>
+            like.username === username && like.moviename === this.movielist.moviename
+          );
+          this.likeid=like.id
+          const res = await axios.get(this.$httpUrl + "/userlike/del?id="+this.likeid);
+          if (res.data.code === 200) {
+            this.isLiked = false;
+            this.$message.success('已取消收藏');
+          } else {
+            this.$message.error('取消收藏失败');
+          }
+        } else {
+          // 添加收藏
+          const res = await axios.post(this.$httpUrl + "/userlike/save", {
+            username: username,
+            moviename: this.movielist.moviename,
+            moviecover:this.movielist.moviecover
+          });
+          if (res.data.code === 200) {
+            this.isLiked = true;
+            this.$message.success('收藏成功');
+          } else {
+            this.$message.error('收藏失败');
+          }
+        }
+    },
     calculateRating(movie) {
       const boxOffice = parseFloat(movie.moviebox);
       const baseRating = 7.5;
@@ -50,6 +92,21 @@ export default {
       const today = new Date();
       today.setHours(0, 0, 0, 0); // 清除时间部分
       return new Date(releaseDate) <= today;
+    },
+    // 检查是否已收藏
+    async checkIfLiked() {
+      try {
+        const user =  JSON.parse(sessionStorage.getItem('CurUser'));
+        const username = user.username
+        
+        const res = await axios.get(this.$httpUrl + "/userlike/list");
+        const likes = res.data;
+        this.isLiked = likes.some(like => 
+          like.username === username && like.moviename === this.movielist.moviename
+        );
+      } catch (error) {
+        console.error('检查收藏状态失败:', error);
+      }
     }
   },
   created() {
@@ -59,10 +116,13 @@ export default {
         if (movieId) {
           const movie = this.movielist.find(m => m.id == movieId);
           this.movielist = movie;
+          // 检查收藏状态
+          this.checkIfLiked();
         }
       }
     });
-  }
+  },
+
 };
 </script>
 
@@ -82,7 +142,7 @@ export default {
           <h1 class="movie-title">{{ movielist.moviename }}</h1>
 
           <div class="movie-meta">
-            <span class="meta-item" >{{ movielist.movietype.join(" / ") }}</span>
+            <span class="meta-item">{{ movielist?.movietype?.join('/') }}</span>
             <span class="meta-item">{{ movielist.movieduration }}分钟</span>
             <span class="meta-item">{{ movielist.movietime }} 9:00上映</span>
           </div>
@@ -114,7 +174,15 @@ export default {
                 disabled>
           暂未上映
         </button>
+        <!-- 收藏按钮 -->
+        <button
+            :class="['like-btn', isLiked ? 'liked' : 'unliked']"
+            @click="addlike()">
+          <span class="like-icon">♥</span>
+          <span class="like-text">{{ isLiked ? '已收藏' : '点击收藏' }}</span>
+        </button>
       </div>
+
 
       <!-- 剧情简介区 -->
       <div class="movie-section">
@@ -126,6 +194,7 @@ export default {
           <p class="movie-desc">{{ movielist.describes }}</p>
         </div>
       </div>
+
     </div>
   </div>
 </template>
@@ -254,8 +323,8 @@ export default {
 /* 操作按钮区 */
 .movie-actions {
   display: flex;
-  gap: 20px;
-  padding: 0 30px 30px;
+  gap: 10px;
+  padding: 0 20px 20px;
 }
 
 .primary-btn {
@@ -286,6 +355,66 @@ export default {
   font-size: 18px;
   font-weight: 600;
   cursor: not-allowed;
+}
+/* 收藏按钮样式 */
+.like-btn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border: 2px solid;
+  border-radius: 8px;
+  padding: 12px 0;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  background: white;
+}
+
+.like-btn.unliked {
+  border-color: #ff5f6d;
+  color: #ff5f6d;
+  background: white;
+}
+
+.like-btn.unliked:hover {
+  background: #fff5f5;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(255, 95, 109, 0.2);
+}
+
+.like-btn.liked {
+  border-color: #ff5f6d;
+  background: linear-gradient(135deg, #ff5f6d, #ff7b54);
+  color: white;
+  box-shadow: 0 4px 12px rgba(255, 95, 109, 0.3);
+}
+
+.like-btn.liked:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(255, 95, 109, 0.4);
+}
+
+.like-icon {
+  font-size: 18px;
+  transition: all 0.3s ease;
+}
+
+.like-btn.unliked .like-icon {
+  color: #ff5f6d;
+}
+
+.like-btn.liked .like-icon {
+  color: white;
+  animation: pulse 0.5s ease;
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.2); }
+  100% { transform: scale(1); }
 }
 /* 剧情简介区 */
 .movie-section {

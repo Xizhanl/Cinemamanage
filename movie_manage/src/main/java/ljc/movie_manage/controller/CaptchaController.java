@@ -29,7 +29,6 @@ public class CaptchaController {
         System.out.println(code);
         // 生成唯一 key（用于前端提交时验证）
         String captchaKey = UUID.randomUUID().toString();
-        System.out.println(captchaKey);
         // 存入 Redis，有效期 1 分钟
         redisTemplate.opsForValue().set(
                 "captcha:" + captchaKey,

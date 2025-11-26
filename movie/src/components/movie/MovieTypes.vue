@@ -55,6 +55,7 @@ export default {
     },
     resetParam(){
       this.type=''
+      this.loadPost()
     },
     add(){//新增
       this.dialogVisible=true

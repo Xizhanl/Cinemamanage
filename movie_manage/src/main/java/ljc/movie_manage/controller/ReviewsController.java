@@ -29,7 +29,7 @@ public class ReviewsController {
         return reviewsService.save(reviews)?Result.suc():Result.fail();
     }
     //删除
-    @PostMapping("/del")
+    @GetMapping("/del")
     public Result del(@RequestBody Reviews reviews){
         return reviewsService.removeById(reviews)?Result.suc():Result.fail();
     }
